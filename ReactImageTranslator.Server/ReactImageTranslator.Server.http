@@ -1,0 +1,6 @@
+@ReactImageTranslator.Server_HostAddress = http://localhost:5245
+
+GET {{ReactImageTranslator.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
