@@ -11,13 +11,13 @@ namespace ReactImageTranslator.Server.Controllers
     public class PythonController : Controller
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        //private readonly IHubContext<OutputHub> _hubContext;
+        private readonly IHubContext<PythonOutputHub> _hubContext;
         string consoleOutput = "";
 
-        public PythonController(IWebHostEnvironment webHostEnvironment) //, IHubContext<OutputHub> hubContext
+        public PythonController(IWebHostEnvironment webHostEnvironment, IHubContext<PythonOutputHub> hubContext)
         {
             _webHostEnvironment = webHostEnvironment;
-            //_hubContext = hubContext;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -42,6 +42,8 @@ namespace ReactImageTranslator.Server.Controllers
             {
                 using (Process p = Process.Start(py))
                 {
+                    p.BeginOutputReadLine();
+                    p.BeginErrorReadLine();
                     p.OutputDataReceived += Process_OutputDataReceived;
                     p.ErrorDataReceived += Process_OutputDataReceived;
 
@@ -61,8 +63,9 @@ namespace ReactImageTranslator.Server.Controllers
 
         void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            consoleOutput += "\n" + e.Data; // add to output textbox
-            //_hubContext.Clients.All.SendAsync("ReceiveOutput", e.Data);
+            //consoleOutput += "\n" + e.Data; // add to output textbox
+            if(e.Data != null)
+                _hubContext.Clients.All.SendAsync("recvPython", e.Data);
         }
 
 
@@ -94,5 +97,11 @@ namespace ReactImageTranslator.Server.Controllers
         }
     }
 
-    //public class OutputHub : Hub { }
+    public class PythonOutputHub : Hub
+    {
+        public async Task SendMessage(string message)
+        {
+            await Clients.All.SendAsync("recvPython", message);
+        }
+    }
 }

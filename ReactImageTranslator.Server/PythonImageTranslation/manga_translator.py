@@ -132,7 +132,7 @@ def translate_page(image_filepath):
     savename = os.path.splitext(image_filename)[0] + "_" + th.TranslatorService.GOOGLE.value + "_translated.jpg"
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    print("\n-savename: " + os.path.join(output_folder, savename) + "\n")
+    #print("\n-savename: " + os.path.join(output_folder, savename) + "\n")
     cv2.imwrite(os.path.join(output_folder, savename), image)
     #if debug:
         #cv2.imshow(image_filename, image)
@@ -195,8 +195,8 @@ for page in pages_list:
 
 end_time = time.perf_counter()
 time_taken = end_time - start_time
-print(f"Time taken: {time_taken:.6f} seconds")
-print("Total characters translated: ", total_character_count_translated)
+print(f"\nTime taken: {time_taken:.6f} seconds")
+print("Total characters translated: ", translator.total_character_count_translated)
 
 #cv2.waitKey(0)  # Wait for a key press to close the window
 #cv2.destroyAllWindows()

@@ -12,7 +12,6 @@ namespace ReactImageTranslator.Server
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("PolicyApi", policy =>
@@ -29,11 +28,13 @@ namespace ReactImageTranslator.Server
                     //.WithHeaders(HeaderNames.ContentType);
                 });
             });
+            builder.Services.AddSignalR();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-            builder.Services.AddSignalR();
+            
+            //builder.Services.AddHostedService<PythonOutputHub>();
 
 
             var app = builder.Build();
@@ -53,12 +54,14 @@ namespace ReactImageTranslator.Server
 
             app.UseStaticFiles();
 
-            app.UseAuthorization();
+            app.UseRouting();
 
+            app.UseAuthorization();
 
             app.MapControllers();
 
-            //app.MapHub<OutputHub>("/outputHub");
+            app.MapHub<PythonOutputHub>("/recvPython");
+
 
             app.MapFallbackToFile("/index.html");
             

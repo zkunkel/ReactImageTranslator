@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import JSZip from 'jszip';
-import saveAs from 'file-saver';
-import * as signalR from '@microsoft/signalr';
+import saveAs from 'file-saver'; 
+import { HubConnectionBuilder, HttpTransportType, LogLevel, HubConnectionState } from '@microsoft/signalr';
+//import * as signalR from '@microsoft/signalr';
 import './App.css';
 
 function App() {
@@ -44,7 +45,8 @@ function App() {
                 //    method: 'POST',
                 //    body: formData,
                 //});
-                
+                setPythonOutput("") //reset console text
+
                 const result = await axios.post("https://localhost:44307/api/filehandler/UploadFiles", formData)
                 const data = await result.data;
 
@@ -60,7 +62,7 @@ function App() {
 
                 const translatedImageUrls = await response.json();
                 setImageUrls(translatedImageUrls);
-
+                
 
             } catch (error) {
                 console.error(error);
@@ -103,20 +105,43 @@ function App() {
     };
 
     
-    //const [pythonOutput, setPythonOutput] = useState('');
-    //useEffect(() => {
-    //    const connection = new signalR.HubConnectionBuilder()
-    //        .withUrl('https://localhost:44307/outputHub')
-    //        .build();
+    const [pythonOutput, setPythonOutput] = useState('');
+    useEffect(() => {
 
-    //    connection.on('ReceiveOutput', (line) => {
-    //        setOutput(prev => prev + line + '\n');
-    //    });
+        const newConnection = new HubConnectionBuilder()
+            .configureLogging(LogLevel.Debug)
+            .withUrl('https://localhost:44307/recvPython', {
+                skipNegotiation: true,
+                transport: HttpTransportType.WebSockets
+            })
+            .withAutomaticReconnect()
+            .build();
 
-    //    connection.start();
+        newConnection.on('recvPython', (message) => {
+            setPythonOutput(prev => prev + message + '\n');
+        });
 
-    //    return () => connection.stop();
-    //}, []);
+        try {
+            newConnection.start()
+                .then(() => console.log("signalr connected"))
+                .catch(err => console.error('Error starting signalR connection: ', err));
+        } catch { }
+
+        //return () => {
+        //    newConnection.stop()
+        //        .then(() => console.log('SignalR Disconnected'))
+        //        .catch((err) => console.error('Error while stopping connection: ', err));
+        //};
+    }, []);
+
+
+    // auto scroll for python log
+    const pythonTextArea = useRef(null);
+    useEffect(() => {
+        if (pythonTextArea.current) {
+            pythonTextArea.current.scrollTop = pythonTextArea.current.scrollHeight;
+        }
+    }, [pythonOutput]);
 
 
     //const handleClick = () => {
@@ -126,42 +151,46 @@ function App() {
 
     return (
         <div>
-            <h1 id="tableLabel">React Translator</h1>
+            <h1 style={{ margin: '10px' }} id="tableLabel">React Image Translator</h1>
 
-            
+            {/*file picker*/}
             <div className="input-group">
-                <input type="file" accept="image/*" multiple onChange={onFileChange} />
+                <input type="file" accept="image/*" style={{ padding: '10px' }} multiple onChange={onFileChange} />
             </div>
-            <ul>
-                {files.map((file, index) => (
-                    <li key={index}>
-                        <strong>{file.name}</strong> ({(file.size / 1024).toFixed(2)} KB, {file.type})
-                        {previews[index] && file.type.startsWith("image/") && (
-                            <div><img src={previews[index]} alt={file.name} width="100" /></div>
-                        )}
-                        {previews[index] && file.type.startsWith("text/") && (
-                            <pre>{previews[index]}</pre>
-                        )}
-                    </li>
-                ))}
-            </ul>
 
-            {files && (
-                <button
-                    onClick={onFileUpload}
-                    className="submit"
-                >Translate selected images</button>
+            {/*displays uploaded images*/}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '10px' }}>
+                {files.length > 0 ? (
+                    files.map((file, index) => (
+                        <img
+                            key={index}
+                            src={previews[index]}
+                            alt={file.name}
+                            style={{ width: '200px', height: '300px', objectFit: 'cover' }}
+                        />
+                    ))
+                ) : (
+                    <div></div>
+                )}
+            </div>
+
+            {/*button to translate images*/}
+            {files.length > 0 && (
+                <button style={{ marginBottom: '10px' }} onClick={onFileUpload}> Translate selected images </button>
             )}
 
-            {/*<div>*/}
-            {/*    <textarea value={pythonOutput} readOnly rows={20} cols={80} />;*/}
-            {/*</div>*/}
-
-
-            
+            {/*python logging textbox*/}
             <div>
-                <h2>Translated Images</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {pythonOutput.length > 0 &&
+                    <textarea ref={pythonTextArea} value={pythonOutput} style={{ padding: '10px' }} readOnly rows={20} cols={80} />
+                }
+            </div>
+
+
+            {/*displays translated images based on urls*/}
+            <div>
+                {imageUrls.length > 0 && <h2 style={{ margin: '1px' }} >Translated Images:</h2>}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '10px' }}>
                     {imageUrls.length > 0 ? (
                         imageUrls.map((url, index) => (
                             <img
@@ -172,13 +201,13 @@ function App() {
                             />
                         ))
                     ) : (
-                        <div>No images translated yet</div>
+                        <div></div>
                     )}
                 </div>
             </div>
 
 
-            
+            {/*button to download all of the translated image as a zip*/}
             {imageUrls.length > 0 && (
                 <button onClick={downloadImages} disabled={downloading}>
                     {downloading ? 'Creating ZIP...' : 'Download translated images as ZIP'}
