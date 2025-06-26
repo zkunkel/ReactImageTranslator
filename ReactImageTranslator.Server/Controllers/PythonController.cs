@@ -56,7 +56,7 @@ namespace ReactImageTranslator.Server.Controllers
             }
             
 
-            return Ok("exit: " + exitCode + " || " + output);
+            return Ok("exit: " + exitCode + " || " + consoleOutput);
         }
 
         void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -66,33 +66,32 @@ namespace ReactImageTranslator.Server.Controllers
         }
 
 
-        //[HttpGet]
-        //[Route("getimages")]
-        //public IActionResult GetImages()
-        //{
-        //    var imageFolderPath = Path.Combine(_webHostEnvironment.WebRootPath ?? _webHostEnvironment.ContentRootPath, "Uploads");
+        [HttpGet]
+        [Route("getimages")]
+        public IActionResult GetImages()
+        {
+            string[] imageExtensions = { ".jpg", ".jpeg", ".png" };
 
-        //    if (!Directory.Exists(imageFolderPath))
-        //    {
-        //        return NotFound("Image folder not found.");
-        //    }
+            var imageFolderPath = Path.Combine(_webHostEnvironment.WebRootPath ?? _webHostEnvironment.ContentRootPath, "Uploads", "translated");
+            
+            if (!Directory.Exists(imageFolderPath))
+            {
+                return NotFound("Image folder not found.");
+            }
 
-        //    var imageFiles = Directory.GetFiles(imageFolderPath)
-        //                             .Select(filePath => Path.GetFileName(filePath))
-        //                             .ToList();
+            var imageFiles = Directory.GetFiles(imageFolderPath)
+                .Where(file => imageExtensions.Contains(Path.GetExtension(file).ToLower()))
+                .Select(filePath => Path.GetFileName(filePath))
+                .ToList();
 
-        //    // Construct full URLs for the images
-        //    var imageUrls = imageFiles.Select(fileName =>
-        //    {
-        //        // Adjust based on your static file configuration
-        //        // If using wwwroot/images:
-        //        return $"{Request.Scheme}://{Request.Host}/images/{fileName}";
-        //        // If using custom folder "Uploads" with RequestPath = "/StaticImages":
-        //        // return $"{Request.Scheme}://{Request.Host}/StaticImages/{fileName}";
-        //    }).ToList();
+            // Construct full URLs for the images
+            var imageUrls = imageFiles.Select(fileName =>
+            {
+                return $"{Request.Scheme}://{Request.Host}/Uploads/translated/{fileName}";
+            }).ToList();
 
-        //    return Ok(imageUrls);
-        //}
+            return Ok(imageUrls);
+        }
     }
 
     //public class OutputHub : Hub { }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import JSZip from 'jszip';
+import saveAs from 'file-saver';
 import * as signalR from '@microsoft/signalr';
 import './App.css';
 
@@ -7,7 +9,8 @@ function App() {
 
     const [files, setFiles] = useState([]);
     const [previews, setPreviews] = useState([]);
-    //const [imageUrls, setImageUrls] = useState([]);
+    const [imageUrls, setImageUrls] = useState([]);
+    const [downloading, setDownloading] = useState(false);
 
     const onFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
@@ -33,8 +36,6 @@ function App() {
 
     const onFileUpload = async () => {
         if (files) {
-            console.log('Uploading file...');
-
             const formData = new FormData();
             files.forEach((file) => formData.append('files', file));
             
@@ -43,9 +44,7 @@ function App() {
                 //    method: 'POST',
                 //    body: formData,
                 //});
-                //const res = await axios.get("https://localhost:44307/api/python/version");
                 
-
                 const result = await axios.post("https://localhost:44307/api/filehandler/UploadFiles", formData)
                 const data = await result.data;
 
@@ -53,20 +52,54 @@ function App() {
 
                 console.log(data);
 
-
                 // display translated images
-                //const response = await fetch('https://localhost:44307/api/python/getimages');
-                //if (!response.ok) {
-                //    throw new Error(`HTTP error! status: ${response.status}`);
-                //}
-                //const tlimdata = await response.json();
-                //setImageUrls(tlimdata);
+                //const response = await axios.get('https://localhost:44307/api/python/getimages') does this randomly fail sometimes????
+                const response = await fetch('https://localhost:44307/api/python/getimages');
+                if (!response.ok)
+                    throw new Error(`Error status: ${response.status}`);
+
+                const translatedImageUrls = await response.json();
+                setImageUrls(translatedImageUrls);
 
 
             } catch (error) {
                 console.error(error);
             }
         }
+    };
+
+    const downloadImages = async () => {
+        setDownloading(true);
+        const zip = new JSZip();
+        const folderToDownload = zip.folder("translatedImages"); // Create a folder inside the zip
+
+        // Use Promise.all to fetch all image data concurrently
+        const fetchPromises = imageUrls.map(async (url) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+                }
+                const blob = await response.blob();
+                const fileName = url.substring(url.lastIndexOf('/') + 1);
+
+                // Add the file to the zip folder
+                folderToDownload.file(fileName, blob);
+            } catch (error) {
+                console.error(`Error processing ${url}:`, error);
+            }
+        });
+        await Promise.all(fetchPromises); // Wait for all fetches to complete
+
+        // Generate the zip file
+        zip.generateAsync({ type: 'blob' })
+            .then((content) => {
+                saveAs(content, 'translatedImages.zip');
+            })
+            .catch((error) => {
+                console.error("Error generating zip:", error);
+            });
+        setDownloading(false);
     };
 
     
@@ -97,7 +130,7 @@ function App() {
 
             
             <div className="input-group">
-                <input type="file" multiple onChange={onFileChange} />
+                <input type="file" accept="image/*" multiple onChange={onFileChange} />
             </div>
             <ul>
                 {files.map((file, index) => (
@@ -125,44 +158,40 @@ function App() {
             {/*</div>*/}
 
 
-            {/*<div>*/}
-            {/*    <h1>My Image Gallery</h1>*/}
-            {/*    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>*/}
-            {/*        {imageUrls.length > 0 ? (*/}
-            {/*            imageUrls.map((url, index) => (*/}
-            {/*                <img*/}
-            {/*                    key={index}*/}
-            {/*                    src={url}*/}
-            {/*                    alt={`Gallery Image ${index}`}*/}
-            {/*                    style={{ width: '200px', height: '150px', objectFit: 'cover' }}*/}
-            {/*                />*/}
-            {/*            ))*/}
-            {/*        ) : (*/}
-            {/*            <div>No images found.</div>*/}
-            {/*        )}*/}
-            {/*    </div>*/}
-            {/*</div>*/}
+            
+            <div>
+                <h2>Translated Images</h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {imageUrls.length > 0 ? (
+                        imageUrls.map((url, index) => (
+                            <img
+                                key={index}
+                                src={url}
+                                alt={`image ${index}`}
+                                style={{ width: '200px', height: '300px', objectFit: 'cover' }}
+                            />
+                        ))
+                    ) : (
+                        <div>No images translated yet</div>
+                    )}
+                </div>
+            </div>
+
+
+            
+            {imageUrls.length > 0 && (
+                <button onClick={downloadImages} disabled={downloading}>
+                    {downloading ? 'Creating ZIP...' : 'Download translated images as ZIP'}
+                </button>
+            )}
 
 
         </div>
 
 
 
-
-
-
-
-
     );
 
-
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
-    }
 }
 
 export default App;

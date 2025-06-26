@@ -48,8 +48,10 @@ namespace ReactImageTranslator.Server
             }
 
             app.UseHttpsRedirection();
-
+            
             app.UseCors("PolicyApi");
+
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
