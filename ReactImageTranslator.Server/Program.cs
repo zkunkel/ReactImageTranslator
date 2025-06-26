@@ -1,4 +1,8 @@
 
+using Microsoft.Net.Http.Headers;
+using ReactImageTranslator.Server.Controllers;
+using System;
+
 namespace ReactImageTranslator.Server
 {
     public class Program
@@ -9,9 +13,28 @@ namespace ReactImageTranslator.Server
 
             // Add services to the container.
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("PolicyApi", policy =>
+                {
+                    policy.WithOrigins("https://localhost:3161",
+                        "http://localhost:3161",
+                        "https://localhost:44307",
+                        "http://localhost:44307"
+                        )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+                    //.WithMethods("POST", "GET", "PUT", "DELETE")
+                    //.WithHeaders(HeaderNames.ContentType);
+                });
+            });
+
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddSignalR();
+
 
             var app = builder.Build();
 
@@ -26,12 +49,21 @@ namespace ReactImageTranslator.Server
 
             app.UseHttpsRedirection();
 
+            app.UseCors("PolicyApi");
+
             app.UseAuthorization();
 
 
             app.MapControllers();
 
+            //app.MapHub<OutputHub>("/outputHub");
+
             app.MapFallbackToFile("/index.html");
+            
+
+            //app.UseDeveloperExceptionPage();
+
+            //spa.UseProxyToSpaDevelopmentServer("http://localhost:3161");
 
             app.Run();
         }
