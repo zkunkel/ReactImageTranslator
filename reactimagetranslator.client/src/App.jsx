@@ -8,6 +8,8 @@ import ImageDownloader from './components/ImageDownloader'
 import ImageUploadPreviews from './components/ImageUploadPreviews'
 import ImageDownloadPreviews from './components/ImageDownloadPreviews'
 import PythonConsole from './components/PythonConsole'
+import OCRSettings from './components/settings/OCRSettings'
+import TranslationSettings from './components/settings/TranslationSettings'
 
 function App() {
 
@@ -17,26 +19,39 @@ function App() {
     const [pythonOutput, setPythonOutput] = useState('');       // holds the python log
     
     return (
-        <div>
-            <h1 style={{ margin: '10px' }} id="tableLabel">React Image Translator</h1>
+        <div className="container">
+            <div className="header"><h1 style={{ margin: '10px' }} id="tableLabel">React Image Translator</h1></div>
 
-            {/*button to select images*/}
-            <ImageSelector setSelectedImages = { setSelectedImages } setPreviews = { setPreviews } />
+            <div className="main">
+                {/*button to select images*/}
+                <ImageSelector setSelectedImages={setSelectedImages} setPreviews={setPreviews} />
 
-            {/*displays previews from selected image blobs*/}
-            <ImageUploadPreviews selectedImages={selectedImages} previews={previews} />
+                {/*displays previews from selected image blobs*/}
+                <ImageUploadPreviews selectedImages={selectedImages} previews={previews} />
+            </div>
 
-            {/*uploads and translates images on server*/}
-            <ImageUploader selectedImages={selectedImages} setImageUrls={setImageUrls} setPythonOutput={setPythonOutput} />
+            <div className="settings">
+                <OCRSettings />
 
-            {/*sets up signalr and recieves/displays live python logging in a textbox*/}
-            <PythonConsole pythonOutput={pythonOutput} setPythonOutput={setPythonOutput} />
+                <TranslationSettings />
 
-            {/*displays translated images based on urls of translated files on server*/}
-            <ImageDownloadPreviews imageUrls={imageUrls} />
+                {/*uploads and translates images on server*/}
+                <ImageUploader selectedImages={selectedImages} setImageUrls={setImageUrls} setPythonOutput={setPythonOutput} />
+            </div>
 
-            {/*button to download all of the translated image as a zip*/}
-            <ImageDownloader imageUrls={imageUrls} />
+            <div className="console">
+                {/*sets up signalr and recieves/displays live python logging in a textbox*/}
+                <PythonConsole pythonOutput={pythonOutput} setPythonOutput={setPythonOutput} />
+            </div>
+
+            <div className="output">
+                {/*displays translated images based on urls of translated files on server*/}
+                <ImageDownloadPreviews imageUrls={imageUrls} />
+
+                {/*button to download all of the translated image as a zip*/}
+                <ImageDownloader imageUrls={imageUrls} />
+            </div>
+
         </div>
 
     );

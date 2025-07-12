@@ -1,0 +1,14 @@
+body {
+}
+
+
+select {
+    border-radius: 4px;
+    padding: 6px;
+
+    margin-left: 16px;
+}
+
+.dropdownLabel {
+    margin-left: 16px;
+}

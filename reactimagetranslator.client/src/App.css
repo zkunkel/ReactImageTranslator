@@ -1,11 +1,60 @@
 ﻿#root {
-    max-width: 1280px;
+    /*    max-width: 1280px;
     margin: 0 auto;
     padding: 2rem;
-    text-align: center;
+    text-align: center;*/
+
+    margin: 0;
+    /*overflow: hidden;*/
+    scrollbar-gutter: stable;
 }
 
 th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
+/*    padding-left: 1rem;
+    padding-right: 1rem;*/
+}
+
+.container {
+    display: grid;
+    box-sizing: border-box;
+    grid-template-areas:
+        "header header"
+        "main settings"
+        "console settings"
+        "output output";
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: auto 0.8fr .2fr 1fr;
+    gap: 0px;
+    background-color: #008080;
+    border-style: solid;
+    min-height: 100vh;
+    min-width: 100%;
+}
+.header {
+    grid-area: header;
+    text-align: center;
+    border-style: solid;
+}
+.main {
+    grid-area: main;
+    border-style: solid;
+}
+.settings {
+    grid-area: settings;
+    border-style: solid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.console {
+    grid-area: console;
+    border-style: solid;
+}
+.output {
+    grid-area: output;
+    border-style: solid;
+}
+
+.settingsPanel {
+    
 }

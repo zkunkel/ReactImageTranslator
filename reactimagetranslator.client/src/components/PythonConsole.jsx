@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { HubConnectionBuilder, HttpTransportType, LogLevel, HubConnectionState } from '@microsoft/signalr';
 //import * as signalR from '@microsoft/signalr';
 
+import './PythonConsole.css';
+
 export default function PythonConsole({ pythonOutput, setPythonOutput }) {
 
     useEffect(() => {
@@ -44,9 +46,10 @@ export default function PythonConsole({ pythonOutput, setPythonOutput }) {
 
     return (
         <div>
-            {pythonOutput.length > 0 &&
-                <textarea ref={pythonTextArea} value={pythonOutput} style={{ padding: '10px' }} readOnly rows={20} cols={80} />
-            }
+            <textarea className='pyconsole' ref={pythonTextArea} value={pythonOutput} readOnly rows={12} /*cols={80}*/ />
+            {/*{pythonOutput.length > 0 &&*/}
+            {/*    <textarea className='pyconsole' ref={pythonTextArea} value={pythonOutput} readOnly rows={12} />*/}
+            {/*}*/}
         </div>
     );
 }

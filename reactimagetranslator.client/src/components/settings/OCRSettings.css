@@ -1,0 +1,44 @@
+
+body {
+    display: flex;
+    align-items: center
+}
+
+
+.settingsFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+    width: 100%;
+}
+.settingsCol {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 10px;
+    gap: 4px;
+}
+.column label {
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+input[type='range'] {
+    -webkit-appearance: none;
+    height: 7px;
+    background: grey;
+    border-radius: 5px;
+    background-image: linear-gradient(to right, #00adad, #00adad);
+    background-repeat: no-repeat;
+}
+
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #00d0d0;
+    cursor: pointer;
+    box-shadow: 0 0 2px 0 #555;
+}

@@ -43,7 +43,7 @@ function ImageDownloader({ imageUrls }) {
     return (
         <div>
             {imageUrls && imageUrls.length > 0 && (
-                <button onClick={downloadImages} disabled={downloading}>
+                <button onClick={downloadImages} disabled={downloading} style={{ margin: '10px' }}>
                     {downloading ? 'Creating ZIP...' : 'Download translated images as ZIP'}
                 </button>
             )}

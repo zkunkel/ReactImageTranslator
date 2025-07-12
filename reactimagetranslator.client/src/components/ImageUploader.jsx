@@ -40,7 +40,7 @@ export default function ImageUploader({ selectedImages, setImageUrls, setPythonO
     return (
         <div>
             {selectedImages && selectedImages.length > 0 && (
-                <button style={{ marginBottom: '10px' }} onClick={onFileUpload}> Translate selected images </button>
+                <button style={{ marginBottom: '20px', marginLeft: '40px' }} onClick={onFileUpload}> Translate selected images </button>
             )}
         </div>
     );

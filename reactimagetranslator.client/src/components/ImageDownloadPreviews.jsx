@@ -2,7 +2,7 @@
 export default function ImageDownloadPreviews({ imageUrls }) {
     return (
         <div>
-            {imageUrls && imageUrls.length > 0 && <h2 style={{ margin: '1px' }} >Translated Images:</h2>}
+            {imageUrls && imageUrls.length > 0 && <h2 style={{ margin: '10px' }} >Translated Images:</h2>}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '10px' }}>
                 {imageUrls && imageUrls.length > 0 ? (
                     imageUrls.map((url, index) => (

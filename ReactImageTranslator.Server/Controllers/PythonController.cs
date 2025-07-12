@@ -91,7 +91,7 @@ namespace ReactImageTranslator.Server.Controllers
             var imageUrls = imageFiles.Select(fileName =>
             {
                 return $"{Request.Scheme}://{Request.Host}/Uploads/translated/{fileName}";
-            }).ToList();
+            }).Reverse().ToList();
 
             return Ok(imageUrls);
         }
